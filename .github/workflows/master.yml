@@ -1,0 +1,47 @@
+name: SnapMark - CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build-test-publish:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        dotnet-version: ['9.0.x']
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ matrix.dotnet-version }}
+
+      - name: Restore
+        run: dotnet restore SnapMark.sln
+
+      - name: Build
+        run: dotnet build SnapMark.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test SnapMark.sln --configuration Release --no-build --collect:"XPlat Code Coverage"
+
+      - name: Upload code coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: '**/coverage.cobertura.xml'
+
+      - name: Publish API
+        run: dotnet publish SnapMark.Api/SnapMark.Api.csproj --configuration Release --no-build --output ./publish
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: snapmark-api
+          path: ./publish
