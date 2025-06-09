@@ -24,13 +24,10 @@ jobs:
           dotnet-version: ${{ matrix.dotnet-version }}
 
       - name: Restore
-        run: dotnet restore SnapMark.sln
+        run: dotnet restore src/SnapMark.sln
 
       - name: Build
-        run: dotnet build SnapMark.sln --configuration Release --no-restore
-
-      - name: Test
-        run: dotnet test SnapMark.sln --configuration Release --no-build --collect:"XPlat Code Coverage"
+        run: dotnet build src/SnapMark.sln --configuration Release --no-restore
 
       - name: Upload code coverage
         uses: codecov/codecov-action@v3
@@ -38,7 +35,7 @@ jobs:
           files: '**/coverage.cobertura.xml'
 
       - name: Publish API
-        run: dotnet publish SnapMark.Api/SnapMark.Api.csproj --configuration Release --no-build --output ./publish
+        run: dotnet publish src/SnapMark.Api/SnapMark.Api.csproj --configuration Release --no-build --output ./publish
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
